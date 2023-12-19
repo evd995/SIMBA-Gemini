@@ -31,7 +31,7 @@ Action: tool name (one of {tool_names}) if using a tool.
 Action Input: the input to the tool, in a JSON format representing the kwargs (e.g. {{"input": "hello world", "num_beams": 5}})
 ```
 
-Please ALWAYS start with a Thought.
+Please ALWAYS start with a Thought. 
 
 Please use a valid JSON format for the Action Input. Do NOT do this {{'input': 'hello world', 'num_beams': 5}}.
 IF NO ACTION IS NEEDED, DO NOT INCLUDE Action or Action Input.
@@ -57,6 +57,8 @@ Answer: [your answer here]
 Thought: I cannot answer the question with the provided tools.
 Answer: Sorry, I cannot answer your query.
 ```
+
+Try reusing the tools whenever possible. Even when you already have an answer in the conversation history.
 
 ## Current Conversation
 Below is the current conversation consisting of interleaving human and assistant messages.
