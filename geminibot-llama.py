@@ -15,6 +15,14 @@ from llama_index.tools import QueryEngineTool, ToolMetadata
 from llama_index.agent import ReActAgent
 from llama_index.agent.react.formatter import ReActChatFormatter
 from react_prompt import CUSTOM_REACT_CHAT_SYSTEM_HEADER
+from llama_index.extractors import (
+    SummaryExtractor,
+    QuestionsAnsweredExtractor,
+    TitleExtractor,
+    KeywordExtractor,
+)
+from llama_index.text_splitter import TokenTextSplitter
+from llama_index.ingestion import IngestionPipeline
 
 GOOGLE_AI_STUDIO = st.secrets["GEMINI_API_KEY"]
 
@@ -29,33 +37,63 @@ generation_config = {
 }
 
 
-model = genai.GenerativeModel(model_name="gemini-pro",
-                              generation_config=generation_config)
 st.title("Gemini Bot")
-
-documents = SimpleDirectoryReader(
-    input_files=["./Sample_Syllabus.pdf"]
-).load_data()
-document = Document(text="\n\n".join([doc.text for doc in documents]))
-
-# Using the embedding model to Gemini
-embed_model = GeminiEmbedding(
-    model_name="models/embedding-001", api_key=GOOGLE_AI_STUDIO
-)
-service_context = ServiceContext.from_defaults(
-    llm=Gemini(api_key=GOOGLE_AI_STUDIO), embed_model=embed_model
-)
-
-index = VectorStoreIndex(
-    [document],
-    service_context=service_context
-)
+llm = Gemini(api_key=GOOGLE_AI_STUDIO, temperature=0.4)
 
 # Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
 if "query_engine" not in st.session_state:
+    # Upload documents with metadata
+
+    text_splitter = TokenTextSplitter(
+        separator=" ", chunk_size=512, chunk_overlap=128
+    )
+
+    extractors = [
+        #TitleExtractor(nodes=5, llm=llm),
+        QuestionsAnsweredExtractor(questions=3, llm=llm),
+        #SummaryExtractor(summaries=["prev", "self"], llm=llm),
+        KeywordExtractor(keywords=3, llm=llm),
+    ]
+
+    transformations = [text_splitter] + extractors
+    pipeline = IngestionPipeline(transformations=transformations)
+
+    # documents = SimpleDirectoryReader(
+    #     input_dir="PDFs",
+    #     required_exts=[".pdf"],
+    #     recursive=True,
+    # ).load_data()
+
+    full_documents = []
+    for filename in ['lecture-1.pdf', 'lecture-2.pdf', 'syllabus.pdf']:
+        documents = SimpleDirectoryReader(
+            input_files=[f"PDFs/{filename}"],
+            # required_exts=[".pdf"],
+            # recursive=True,
+        ).load_data()
+        document = Document(text="\n\n".join([doc.text for doc in documents]))
+        full_documents.append(document)
+        
+    #document = Document(text="\n\n".join([doc.text for doc in documents]))
+    # document_nodes = pipeline.run(documents=documents)
+    document_nodes = pipeline.run(documents=full_documents)
+        
+
+    # Using the embedding model to Gemini
+    embed_model = GeminiEmbedding(
+        model_name="models/embedding-001", api_key=GOOGLE_AI_STUDIO
+    )
+    service_context = ServiceContext.from_defaults(
+        llm=llm, embed_model=embed_model, text_splitter=text_splitter
+    )
+
+    index = VectorStoreIndex(
+        nodes=document_nodes,
+        service_context=service_context
+    )
     st.session_state.query_engine = index.as_query_engine(
         service_context=service_context,
         verbose=True
@@ -64,7 +102,7 @@ if "query_engine" not in st.session_state:
         QueryEngineTool(
             query_engine=st.session_state.query_engine,
             metadata=ToolMetadata(
-                name="Syllabus",
+                name="classes_and_syllabus",
                 description=(
                     "Provides information about the course, such as administrative issues, " +  
                     "bibliography, schedules, and important stuff to pass. "
@@ -76,7 +114,7 @@ if "query_engine" not in st.session_state:
     react_formatter.system_header = CUSTOM_REACT_CHAT_SYSTEM_HEADER
     st.session_state.agent = ReActAgent.from_tools(
         query_engine_tools, 
-        llm=Gemini(api_key=GOOGLE_AI_STUDIO), 
+        llm=llm, 
         verbose=True,
         react_chat_formatter=react_formatter
         )
