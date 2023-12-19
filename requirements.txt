@@ -1,3 +1,4 @@
 streamlit
 google-generativeai
 google-ai-generativelanguage
+llama-index
