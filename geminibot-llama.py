@@ -35,10 +35,27 @@ generation_config = {
   "top_k": 1,
   "max_output_tokens": 2048,
 }
-
+safety_settings = [
+  {
+    "category": "HARM_CATEGORY_HARASSMENT",
+    "threshold": "BLOCK_ONLY_HIGH"
+  },
+  {
+    "category": "HARM_CATEGORY_HATE_SPEECH",
+    "threshold": "BLOCK_ONLY_HIGH"
+  },
+  {
+    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+    "threshold": "BLOCK_ONLY_HIGH"
+  },
+  {
+    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+    "threshold": "BLOCK_ONLY_HIGH"
+  }
+]
 
 st.title("Gemini Bot")
-llm = Gemini(api_key=GOOGLE_AI_STUDIO, temperature=0.4)
+llm = Gemini(api_key=GOOGLE_AI_STUDIO, temperature=0.4, safety_settings=safety_settings)
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -105,7 +122,7 @@ if "query_engine" not in st.session_state:
                 name="classes_and_syllabus",
                 description=(
                     "Provides information about the course, such as administrative issues, " +  
-                    "bibliography, schedules, and important stuff to pass. "
+                    "bibliography, schedules, and important stuff to pass. Requires the input parameter be an informative phrase summarizing the information to be retreived."
                 ),
             ),
         )
