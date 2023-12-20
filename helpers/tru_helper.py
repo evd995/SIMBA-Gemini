@@ -97,10 +97,10 @@ def build_tru_recorder(agent):
             f_groundedness,
             f_insensitivity,
             f_input_maliciousness,
-            f_output_maliciousness,
-            f_coherence,
-            f_input_sentiment,
-            f_output_sentiment,
+            #f_output_maliciousness,
+            #f_coherence,
+            #f_input_sentiment,
+            #f_output_sentiment,
             f_no_answer
         ]
     )
