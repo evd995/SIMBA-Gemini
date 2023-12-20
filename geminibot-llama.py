@@ -1,3 +1,9 @@
+import logging
+import sys
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+#logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
+
 import asyncio
 
 # Create a new event loop
@@ -21,7 +27,7 @@ from llama_index.extractors import (
     TitleExtractor,
     KeywordExtractor,
 )
-from llama_index.text_splitter import TokenTextSplitter
+from llama_index.text_splitter import SentenceSplitter
 from llama_index.ingestion import IngestionPipeline
 
 GOOGLE_AI_STUDIO = st.secrets["GEMINI_API_KEY"]
@@ -65,8 +71,8 @@ if "messages" not in st.session_state:
 if "query_engine" not in st.session_state:
     # Upload documents with metadata
 
-    text_splitter = TokenTextSplitter(
-        separator=" ", chunk_size=512, chunk_overlap=128
+    text_splitter = SentenceSplitter(
+        chunk_size=512, chunk_overlap=128
     )
 
     extractors = [
@@ -114,16 +120,18 @@ if "query_engine" not in st.session_state:
     )
     st.session_state.query_engine = index.as_query_engine(
         service_context=service_context,
-        verbose=True
+        verbose=True,
+        similarity_top_k=4
         )
     query_engine_tools = [
         QueryEngineTool(
             query_engine=st.session_state.query_engine,
             metadata=ToolMetadata(
-                name="classes_and_syllabus",
+                name="course_info",
                 description=(
-                    "Provides information about the course, such as administrative issues, " +  
-                    "bibliography, schedules, and important stuff to pass. Requires the input parameter be an informative phrase summarizing the information to be retreived."
+                    "Access relevant documents from the course, such as the syllabus, " +  
+                    "bibliography, and lecture notes." + 
+                    "Requires the input parameter be a phrase summarizing the information to be retreived."
                 ),
             ),
         )
@@ -163,11 +171,11 @@ if prompt:
     with st.chat_message("model", avatar="😸"):
         message_placeholder = st.empty()
         full_response = ""
-        # full_response = st.session_state.agent.chat(prompt)
-        streaming_response = st.session_state.agent.stream_chat(prompt)
-        for response_chunk in streaming_response.response_gen:
-            full_response += response_chunk
-            message_placeholder.markdown(full_response + "▌")
+        full_response = st.session_state.agent.chat(prompt)
+        # streaming_response = st.session_state.agent.stream_chat(prompt)
+        # for response_chunk in streaming_response.response_gen:
+        #     full_response += response_chunk
+        #     message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "model", "content": full_response})

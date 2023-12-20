@@ -59,6 +59,7 @@ Answer: Sorry, I cannot answer your query.
 ```
 
 Try reusing the tools whenever possible. Even when you already have an answer in the conversation history.
+You can also re-try a tool with different inputs to see if you can get a better answer.
 
 ## Current Conversation
 Below is the current conversation consisting of interleaving human and assistant messages.
