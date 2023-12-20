@@ -2,8 +2,8 @@ from trulens_eval import Tru
 import logging
 import sys
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-#logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
+logging.getLogger('llama_index').setLevel(logging.DEBUG)
+
 
 import asyncio
 # Create a new event loop
