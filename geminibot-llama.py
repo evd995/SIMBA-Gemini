@@ -14,7 +14,7 @@ from llama_index.embeddings import GeminiEmbedding
 from llama_index.tools import QueryEngineTool, ToolMetadata
 from llama_index.agent import ReActAgent
 from llama_index.agent.react.formatter import ReActChatFormatter
-from react_prompt import CUSTOM_REACT_CHAT_SYSTEM_HEADER
+from prompts.react_prompt import CUSTOM_REACT_CHAT_SYSTEM_HEADER
 from llama_index.extractors import (
     SummaryExtractor,
     QuestionsAnsweredExtractor,
@@ -35,6 +35,7 @@ generation_config = {
   "top_k": 1,
   "max_output_tokens": 2048,
 }
+
 safety_settings = [
   {
     "category": "HARM_CATEGORY_HARASSMENT",
@@ -162,11 +163,11 @@ if prompt:
     with st.chat_message("model", avatar="😸"):
         message_placeholder = st.empty()
         full_response = ""
-        full_response = st.session_state.agent.chat(prompt)
-        # streaming_response = st.session_state.chat_engine.stream_chat(prompt)
-        # for response_chunk in streaming_response.async_response_gen():
-        #     full_response += response_chunk.text
-        #     message_placeholder.markdown(full_response + "▌")
+        # full_response = st.session_state.agent.chat(prompt)
+        streaming_response = st.session_state.agent.stream_chat(prompt)
+        for response_chunk in streaming_response.response_gen:
+            full_response += response_chunk
+            message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "model", "content": full_response})
