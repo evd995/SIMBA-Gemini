@@ -2,8 +2,8 @@ import streamlit as st
 import PyPDF2
 from llama_index import Document, SimpleDirectoryReader
 from llama_index import download_loader
-from utils.llama_agent_helper import create_agent_from_documents
-from utils.tru_helper import build_tru_recorder
+from helpers.llama_agent_helper import create_agent_from_documents
+from helpers.tru_helper import build_tru_recorder
 from trulens_eval import Tru
 
 st.title("Teacher Demo")
