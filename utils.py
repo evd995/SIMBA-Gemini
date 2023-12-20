@@ -61,7 +61,7 @@ def create_query_engine(documents):
     )
     return query_engine
 
-def create_default_quey_engine_tool(query_engine):
+def create_default_query_engine_tool(query_engine):
     query_engine_tools = [
         QueryEngineTool(
             query_engine=query_engine,
@@ -89,6 +89,6 @@ def create_agent_from_tools(tools):
 
 def create_agent_from_documents(documents):
     query_engine = create_query_engine(documents)
-    query_engine_tools = create_default_quey_engine_tool(query_engine)
+    query_engine_tools = create_default_query_engine_tool(query_engine)
     agent = create_agent_from_tools(query_engine_tools)
     return agent

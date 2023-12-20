@@ -30,7 +30,8 @@ if prompt and 'agent' in st.session_state:
     with st.chat_message("model", avatar="😸"):
         message_placeholder = st.empty()
         full_response = ""
-        full_response = st.session_state.agent.chat(prompt)
+        with st.session_state.tru_student as recording:
+            full_response = st.session_state.agent.chat(prompt)
         # streaming_response = st.session_state.agent.stream_chat(prompt)
         # for response_chunk in streaming_response.response_gen:
         #     full_response += response_chunk
