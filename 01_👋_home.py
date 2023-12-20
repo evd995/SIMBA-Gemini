@@ -1,3 +1,4 @@
+from trulens_eval import Tru
 import logging
 import sys
 
@@ -5,10 +6,8 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 #logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
 import asyncio
-
 # Create a new event loop
 loop = asyncio.new_event_loop()
-
 # Set the event loop as the current event loop
 asyncio.set_event_loop(loop)
 
@@ -20,5 +19,10 @@ st.set_page_config(
 )
 
 st.title("Welcome to the SIMBA-Gemini Demo")
+
+if "tru_student" not in st.session_state:
+    tru = Tru()
+    tru.reset_database()
+
 st.sidebar.success("Select a page above.")
 
