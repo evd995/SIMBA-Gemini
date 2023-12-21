@@ -54,6 +54,8 @@ if "tru_student" in st.session_state:
     if st.button("Check Performance (TruLens)"):
         tru = Tru()
         records, _ = tru.get_records_and_feedback(app_ids=[])
+        metric_cols = records.columns[records.columns.str.startswith("[METRIC]")]
+        records = records[["ts", "input", "output", *metric_cols]]
         st.write(records)
 
     

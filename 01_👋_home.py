@@ -4,7 +4,7 @@ import sys
 
 # Configure LlamaIndex logging to output to stdout at DEBUG level in a single line
 logging.getLogger('llama_index').setLevel(logging.DEBUG)
-logging.getLogger('llama_index').addHandler(logging.StreamHandler(sys.stdout))
+#logging.getLogger('llama_index').addHandler(logging.StreamHandler(sys.stdout))
 
 import asyncio
 # Create a new event loop
