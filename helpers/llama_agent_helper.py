@@ -17,6 +17,9 @@ from llama_index.extractors import (
 from gemini_config import SAFETY_SETTINGS, DEFAULT_TEMPERATURE
 
 
+DEFAULT_ACTIVITY_GOAL = "Help the student reflect on their study habits and plan for future study session."
+
+
 GOOGLE_AI_STUDIO = st.secrets["GEMINI_API_KEY"]
 llm = Gemini(api_key=GOOGLE_AI_STUDIO, temperature=DEFAULT_TEMPERATURE, safety_settings=SAFETY_SETTINGS)
 
@@ -102,8 +105,10 @@ def create_default_educational_tools():
     return [expert_tool]
 
 
-def create_agent_from_tools(tools):
-    react_formatter = ReActChatFormatter(system_header=CUSTOM_REACT_CHAT_SYSTEM_HEADER)
+def create_agent_from_tools(tools, activity_goal=None):
+    activity_goal = activity_goal or DEFAULT_ACTIVITY_GOAL
+    system_header = CUSTOM_REACT_CHAT_SYSTEM_HEADER.format(teacher_goal=activity_goal)
+    react_formatter = ReActChatFormatter(system_header=system_header)
     agent = ReActAgent.from_tools(
         tools, 
         llm=llm, 
@@ -113,9 +118,9 @@ def create_agent_from_tools(tools):
     return agent
 
 
-def create_agent_from_documents(documents):
+def create_agent_from_documents(documents, activity_goal=None):
     query_engine = create_query_engine(documents)
     educational_tools = create_default_educational_tools()
     query_engine_tools = create_default_query_engine_tool(query_engine)
-    agent = create_agent_from_tools(educational_tools + query_engine_tools)
+    agent = create_agent_from_tools(educational_tools + query_engine_tools, activity_goal=activity_goal)
     return agent
