@@ -2,9 +2,11 @@ import streamlit as st
 from trulens_eval import Tru, Feedback, TruLlama, OpenAI as fOpenAI
 from trulens_eval.feedback import Groundedness
 import openai
+from openai import OpenAI
 import numpy as np
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai_client = OpenAI()
 
 class OpenAI_custom(fOpenAI):
     """
@@ -12,13 +14,13 @@ class OpenAI_custom(fOpenAI):
     https://colab.research.google.com/github/truera/trulens/blob/main/trulens_eval/examples/expositional/frameworks/langchain/langchain_agents.ipynb#scrollTo=hnXeWFcPUaqk
     """
     def no_answer_feedback(self, question: str, response: str) -> float:
-        return float(openai.ChatCompletion.create(
+        return float(openai_client.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[
             {"role": "system", "content": "Does the RESPONSE provide an answer to the QUESTION? Rate on a scale of 1 to 10. Respond with the number only."},
             {"role": "user", "content": f"QUESTION: {question}; RESPONSE: {response}"}
         ]
-    )["choices"][0]["message"]["content"]) / 10
+    ).choices[0].message.content) / 10
 
 custom_no_answer = OpenAI_custom()
 
@@ -28,14 +30,14 @@ def build_tru_recorder(agent):
     # Answer Relevance
     f_qa_relevance = Feedback(
         provider.relevance_with_cot_reasons,
-        name="Answer Relevance"
+        name="[METRIC] Answer Relevance"
     ).on_input_output()
 
     # Context Relevance
     context_selection = TruLlama.select_source_nodes().node.text
     f_qs_relevance = (
         Feedback(provider.qs_relevance_with_cot_reasons,
-                name="Context Relevance")
+                name="[METRIC] Context Relevance")
         .on_input()
         .on(context_selection)
         .aggregate(np.mean)
@@ -45,7 +47,7 @@ def build_tru_recorder(agent):
     grounded = Groundedness(groundedness_provider=provider)
     f_groundedness = (
         Feedback(grounded.groundedness_measure_with_cot_reasons,
-                name="Groundedness"
+                name="[METRIC] Groundedness"
                 )
         .on(context_selection)
         .on_output()
@@ -55,38 +57,40 @@ def build_tru_recorder(agent):
     # HARMLESS
     f_insensitivity = Feedback(
         provider.insensitivity_with_cot_reasons,
-        name="Insensitivity",
+        name="[METRIC] Insensitivity",
         higher_is_better=False,
     ).on_output()
 
     f_input_maliciousness = Feedback(
         provider.maliciousness_with_cot_reasons,
-        name="Input Maliciousness",
+        name="[METRIC] Input Maliciousness",
         higher_is_better=False,
     ).on_input()
 
 
     f_output_maliciousness = Feedback(
         provider.maliciousness_with_cot_reasons,
-        name="Output Maliciousness",
+        name="[METRIC] Output Maliciousness",
         higher_is_better=False,
     ).on_output()
 
     # HELPFUL
     f_coherence = Feedback(
-        provider.coherence_with_cot_reasons, name="Coherence"
+        provider.coherence_with_cot_reasons, name="[METRIC] Coherence"
     ).on_output()
 
     f_input_sentiment = Feedback(
-        provider.sentiment_with_cot_reasons, name="Input Sentiment"
+        provider.sentiment_with_cot_reasons, name="[METRIC] Input Sentiment"
     ).on_input()
 
     f_output_sentiment = Feedback(
-        provider.sentiment_with_cot_reasons, name="Ouput Sentiment"
+        provider.sentiment_with_cot_reasons, name="[METRIC] Ouput Sentiment"
     ).on_input()
 
     # AGENT: Missing tools
-    f_no_answer = Feedback(custom_no_answer.no_answer_feedback).on_input_output()
+    f_no_answer = Feedback(
+        custom_no_answer.no_answer_feedback, name="[METRIC] Answers Question"
+    ).on_input_output()
 
     tru_recorder = TruLlama(
         agent,
@@ -101,7 +105,7 @@ def build_tru_recorder(agent):
             #f_coherence,
             #f_input_sentiment,
             #f_output_sentiment,
-            f_no_answer
+            #f_no_answer
         ]
     )
     return tru_recorder
