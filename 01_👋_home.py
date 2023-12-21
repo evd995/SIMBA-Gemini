@@ -1,13 +1,3 @@
-from trulens_eval import Tru
-import logging
-import sys
-
-# Configure LlamaIndex logging to output to stdout at DEBUG level in a single line
-if 'debug_logging_configured' not in st.session_state:
-    logging.getLogger('llama_index').setLevel(logging.DEBUG)
-    logging.getLogger('llama_index').addHandler(logging.StreamHandler(sys.stdout))
-    st.session_state.debug_logging_configured = True
-
 import asyncio
 # Create a new event loop
 loop = asyncio.new_event_loop()
@@ -15,6 +5,17 @@ loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
 import streamlit as st
+from trulens_eval import Tru
+import logging
+import sys
+
+
+# Configure LlamaIndex logging to output to stdout at DEBUG level in a single line
+if 'debug_logging_configured' not in st.session_state:
+    logging.basicConfig(stream=sys.stdout)
+    logging.getLogger('llama_index').setLevel(logging.DEBUG)
+    st.session_state.debug_logging_configured = True
+
 
 st.set_page_config(
     page_title="SIMBA-Gemini Demo",
