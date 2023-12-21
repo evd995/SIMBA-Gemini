@@ -45,8 +45,9 @@ Observation: tool response
 ```
 
 You should keep repeating the above format until you have enough information
-to answer the question without using any more tools. At that point, you MUST respond
-in the one of the following two formats:
+to answer the question without using any more tools. If you do not have enough information
+you can rephrase your inputs.
+At that point, you MUST respond in the one of the following three formats:
 
 ```
 Thought: I can answer without using any more tools.
@@ -56,6 +57,11 @@ Answer: [your answer here]
 ```
 Thought: I cannot answer the question with the provided tools.
 Answer: Sorry, I cannot answer your query.
+```
+
+```
+Thought: I need more context from the user.
+Answer: Sorry, can you please tell me about [needed context]
 ```
 
 Try reusing the tools whenever possible. Even when you already have an answer in the conversation history.

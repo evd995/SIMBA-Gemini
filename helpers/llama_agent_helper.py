@@ -2,7 +2,7 @@ import streamlit as st
 from llama_index.llms import Gemini
 from llama_index import VectorStoreIndex, ServiceContext
 from llama_index.embeddings import GeminiEmbedding
-from llama_index.tools import QueryEngineTool, ToolMetadata
+from llama_index.tools import QueryEngineTool, ToolMetadata, FunctionTool
 from llama_index.agent import ReActAgent
 from llama_index.agent.react.formatter import ReActChatFormatter
 from prompts.react_prompt import CUSTOM_REACT_CHAT_SYSTEM_HEADER
@@ -61,6 +61,7 @@ def create_query_engine(documents):
     )
     return query_engine
 
+
 def create_default_query_engine_tool(query_engine):
     query_engine_tools = [
         QueryEngineTool(
@@ -77,6 +78,30 @@ def create_default_query_engine_tool(query_engine):
     ]
     return query_engine_tools
 
+
+def create_default_educational_tools():
+    EXPERT_PROMPT = (
+        "You are an expert in providing educational advice. Use your knowledge in self-regulated learning to provide support." +
+        "You only know about this topic (you DO NOT know about other topis like math, history, science, etc), so ask for context if you need to answer about this." +
+        "You will receive a question from another tutor about how to support the students" + 
+        "You must answer concisely and informatively. Start your answer with 'I suggest...'" + 
+        "If more context is needed (e.g., information from the course syllabus or academic material), follow the next steps:" +
+        "In this case, include in the answer 'It would be good to have information about...', then follow one of the following two:" +
+        "If you need context from the course (e.g., syllabus or academic material) also include: 'Use another tool to get this context, DO NOT ask the user'."+
+        "If you need context of the student's emotions, also include: 'Ask the student for this information, DO NOT use another tool'."+
+        "Finally, after asking for the context, finish with 'Come back when you have this information.'"
+        "\nINPUT: {input}"
+    )
+    expert_tool = FunctionTool.from_defaults(
+        fn=lambda input: llm.complete(EXPERT_PROMPT.format(input=input)),
+        name="educational_advice",
+        description=(
+            "Ask for advice from an expert educational assistant. They can help with student planning, goal setting, and reflection." + 
+            "They do not have access to the conversation or course context, so be as detailed as possible in your question.")
+    )
+    return [expert_tool]
+
+
 def create_agent_from_tools(tools):
     react_formatter = ReActChatFormatter(system_header=CUSTOM_REACT_CHAT_SYSTEM_HEADER)
     agent = ReActAgent.from_tools(
@@ -87,8 +112,10 @@ def create_agent_from_tools(tools):
     )
     return agent
 
+
 def create_agent_from_documents(documents):
     query_engine = create_query_engine(documents)
+    educational_tools = create_default_educational_tools()
     query_engine_tools = create_default_query_engine_tool(query_engine)
-    agent = create_agent_from_tools(query_engine_tools)
+    agent = create_agent_from_tools(educational_tools + query_engine_tools)
     return agent
