@@ -5,6 +5,9 @@ import openai
 from openai import OpenAI
 import numpy as np
 
+import nest_asyncio
+nest_asyncio.apply()
+
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 openai_client = OpenAI()
 
