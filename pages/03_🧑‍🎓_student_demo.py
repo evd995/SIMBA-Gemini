@@ -9,6 +9,9 @@ import streamlit as st
 st.title("Student Demo")
 GOOGLE_AI_STUDIO = st.secrets["GEMINI_API_KEY"]
 
+if "activity_goal" in st.session_state:
+    st.markdown(f"**The goal for this activity is: {st.session_state.activity_goal}**")
+
 # Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
