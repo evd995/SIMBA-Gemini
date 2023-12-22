@@ -100,7 +100,7 @@ def build_tru_recorder(agent):
         app_id="Students Agent",
         feedbacks=[
             f_qa_relevance,
-            f_qs_relevance,
+            #f_qs_relevance,
             f_groundedness,
             f_insensitivity,
             f_input_maliciousness,
