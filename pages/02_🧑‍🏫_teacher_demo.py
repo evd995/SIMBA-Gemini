@@ -117,8 +117,16 @@ if "tru_student" in st.session_state:
             'input' : st.column_config.TextColumn('input', width="small"),
             'output' : st.column_config.TextColumn('output', width="small"),
         }
+
+        HELP_DICT = {
+            '[METRIC] Answer Relevance': 'A low score could indicate a lack of relevant context in the files.',
+            '[METRIC] Groundedness': 'A low score could indicate hallucinations from the assistant.',
+            '[METRIC] Insensitivity': 'A high score could represent inappropiate answers.',
+            '[METRIC] Input Maliciousness': 'A high score could represent attempts to trick the assistant.',
+        }
+
         for col in metric_cols:
-            config[col] = st.column_config.TextColumn(col.replace('[METRIC] ', '').replace(' ', '\n'), width="small")
+            config[col] = st.column_config.TextColumn(col.replace('[METRIC] ', '').replace(' ', '\n'), width="small", help=HELP_DICT[col])
         records = records[["ts", "input", "output", *metric_cols]]
         records[metric_cols] = records[metric_cols].round(3)
         def color_code(val):
