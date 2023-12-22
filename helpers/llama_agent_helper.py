@@ -1,6 +1,6 @@
 import streamlit as st
 from llama_index.llms import Gemini
-from llama_index import VectorStoreIndex, ServiceContext
+from llama_index import VectorStoreIndex, ServiceContext, StorageContext
 from llama_index.embeddings import GeminiEmbedding
 from llama_index.tools import QueryEngineTool, ToolMetadata, FunctionTool
 from llama_index.agent import ReActAgent
@@ -52,9 +52,14 @@ def create_query_engine(documents):
         llm=llm, embed_model=embed_model, text_splitter=text_splitter
     )
 
+    storage_context = StorageContext.from_defaults(
+        persist_dir='storage/'
+    )
+
     index = VectorStoreIndex(
         nodes=document_nodes,
-        service_context=service_context
+        service_context=service_context,
+        storage_context=storage_context
     )
 
     # Create query engine
