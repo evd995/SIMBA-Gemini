@@ -5,3 +5,4 @@ llama-index
 PyPDF2
 pypdf
 trulens-eval
+llama-hub
