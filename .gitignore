@@ -42,3 +42,5 @@ MANIFEST
 .streamlit/secrets.toml
 
 **/*.sqlite
+
+llamahub_modules/

@@ -5,6 +5,7 @@ from llama_index import download_loader
 from helpers.llama_agent_helper import create_agent_from_documents, DEFAULT_ACTIVITY_GOAL
 from helpers.tru_helper import build_tru_recorder
 from trulens_eval import Tru
+from pathlib import Path
 
 st.title("Teacher Demo")
 
@@ -62,7 +63,10 @@ if len(uploaded_files):
         st.write(metadata.title)
 
         # Process the uploaded file using llama_index (https://llamahub.ai/l/file-pdf?from=all)
-        PDFReader = download_loader("PDFReader")
+        
+        temp_dir = Path("llamahub_modules/")
+        temp_dir.mkdir(exist_ok=True)
+        PDFReader = download_loader("PDFReader", custom_path='llamahub_modules/')
         loader = PDFReader()
         documents = loader.load_data(file=uploaded_file)
 
