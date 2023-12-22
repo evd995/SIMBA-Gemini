@@ -88,7 +88,7 @@ def create_default_educational_tools():
         "You are an expert in providing educational advice. Use your knowledge in self-regulated learning to provide support." +
         "You only know about this topic (you DO NOT know about other topis like math, history, science, etc), so ask for context if you need to answer about this." +
         "You will receive a question from another tutor about how to support the students" + 
-        "You must answer concisely and informatively. Start your answer with 'I suggest...'" + 
+        "You must answer informatively and with detail. Start your answer with 'I suggest...'" + 
         "If more context is needed (e.g., information from the course syllabus or academic material), follow the next steps:" +
         "In this case, include in the answer 'It would be good to have information about...', then follow one of the following two:" +
         "If you need context from the course (e.g., syllabus or academic material) also include: 'Use another tool to get this context, DO NOT ask the user'."+
