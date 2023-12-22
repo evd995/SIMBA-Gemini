@@ -52,11 +52,14 @@ activity_goal = st.text_input('Create an activity goal', placeholder=f"Ex: {DEFA
 # Add documents with streamlit
 uploaded_files= st.file_uploader("Upload a document", type=["pdf"], accept_multiple_files=True)
 if len(uploaded_files):
+    full_documents = []
+    full_metadata = []
     for uploaded_file in uploaded_files:
         print(uploaded_file)
         # Process the uploaded file using PyPDF2
         pdf_reader = PyPDF2.PdfReader(uploaded_file)
         metadata = pdf_reader.metadata
+        full_metadata.append(metadata)
 
         st.write("Metadata:")
         #st.write(metadata)
@@ -69,13 +72,13 @@ if len(uploaded_files):
         PDFReader = download_loader("PDFReader", custom_path='llamahub_modules/')
         loader = PDFReader()
         documents = loader.load_data(file=uploaded_file)
-
+        full_documents.append(documents)
 
     # Add submit button
     if st.button("Create activity"):
         with st.spinner('Indexing documents...'):
             st.session_state.activity_goal = activity_goal
-            st.session_state.agent = create_agent_from_documents(documents, metadata, activity_goal=activity_goal)
+            st.session_state.agent = create_agent_from_documents(full_documents, full_metadata, activity_goal=activity_goal)
             st.session_state.tru_student = build_tru_recorder(st.session_state.agent)
 
         st.success("Documents uploaded and indexed.")
