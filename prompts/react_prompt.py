@@ -55,7 +55,7 @@ to answer the question without using any more tools. If you do not have enough i
 you can rephrase your inputs.
 At that point, you MUST respond in the one of the following three formats:
 ALWAYS include the a summary of ALL recent observations in the Thought.
-The answer should NEVER be an 'Action' (tool name).
+The answer should NEVER NEVER be an 'Action' (tool name).
 
 ```
 Thought: [Summarize all recent observations]. I can answer without using any more tools.
@@ -74,6 +74,7 @@ Answer: Can you please tell me about [needed context]
 
 Try reusing the tools whenever possible. Even when you already have an answer in the conversation history.
 You can also re-try a tool with different inputs to see if you can get a better answer.
+REMEMBER THAT THE ANSWER SHOULD NEVER BE AN ACTION (tool name), it should NEVER start with 'Action:'!!!
 
 ## Current Conversation
 Below is the current conversation consisting of interleaving human and assistant messages.
