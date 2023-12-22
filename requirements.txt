@@ -3,4 +3,5 @@ google-generativeai
 google-ai-generativelanguage
 llama-index
 PyPDF2
+pypdf
 trulens-eval
