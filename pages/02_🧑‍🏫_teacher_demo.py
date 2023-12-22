@@ -72,7 +72,8 @@ if len(uploaded_files):
         PDFReader = download_loader("PDFReader", custom_path='llamahub_modules/')
         loader = PDFReader()
         documents = loader.load_data(file=uploaded_file)
-        full_documents.append(documents)
+        document = Document(text="\n\n".join([doc.text for doc in documents]))
+        full_documents.append(document)
 
     # Add submit button
     if st.button("Create activity"):
