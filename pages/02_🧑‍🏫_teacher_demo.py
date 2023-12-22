@@ -75,7 +75,7 @@ if len(uploaded_files):
     if st.button("Create activity"):
         with st.spinner('Indexing documents...'):
             st.session_state.activity_goal = activity_goal
-            st.session_state.agent = create_agent_from_documents(documents, activity_goal=activity_goal)
+            st.session_state.agent = create_agent_from_documents(documents, metadata, activity_goal=activity_goal)
             st.session_state.tru_student = build_tru_recorder(st.session_state.agent)
 
         st.success("Documents uploaded and indexed.")
