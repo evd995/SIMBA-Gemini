@@ -59,7 +59,7 @@ if "agent" in st.session_state:
         if (groundedness_scores < 0.3).any():
             with col2:
                 st.markdown("🚨 **Low groundedness of the assistant's answers.**")
-                st.markdown("The assistant may be hallucinating some facts. I suggest looking directly at the course material to verify these facts.")
+                st.markdown("The assistant may be hallucinating some facts, giving information that is not based on course context or related sources. I suggest looking directly at the course material to verify these facts or asking the teacher.")
                 ungrounded_records = records.loc[groundedness_scores < 0.3, ['input', 'output', '[METRIC] Groundedness']]
                 for ix, record in ungrounded_records.iterrows():
                     st.markdown(f"**Input**: {record['input']} \n **Output**: {record['output']} \n **Groundedness**: {record['[METRIC] Groundedness']}")

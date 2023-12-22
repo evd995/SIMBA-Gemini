@@ -78,16 +78,16 @@ if "tru_student" in st.session_state:
 
         # Show alerts for metrics that are below 0.3
         if mean_metrics['[METRIC] Answer Relevance'] < (1/3):
-            st.markdown("🚨 **Low relevance of the assistant's answers.** The assistant may not have all the information needed to answer the question. You can try added more files to the activity.")
+            st.markdown("🚨 **Low relevance of the assistant's answers.** The assistant may not have all the information needed to answer the question. You can try adding more documents related to the activity.")
         
         if mean_metrics['[METRIC] Groundedness'] < (1/3):
-            st.markdown("🚨 **Low groundedness of the assistant's answers.** The assistant may be hallucinating some facts. Try addressing them in class to avoid misconceptions.")
+            st.markdown("🚨 **Low groundedness of the assistant's answers.** The assistant may be hallucinating some facts, giving information that is not based on course context or related sources. Try discussing this with your students in class to avoid misconceptions.")
         
         if mean_metrics['[METRIC] Insensitivity'] > (2/3):
-            st.markdown("🚨 **Insensitive answers from the assistant.** The assistant may be giving insensitive answers. In the activity goal you can try adding your desired tone for the bot (friendly, format, etc).")
+            st.markdown("🚨 **Insensitive answers from the assistant.** The assistant may be giving insensitive answers. In the activity goal you can try adding your desired tone for the bot (friendly, formal, etc).")
         
         if mean_metrics['[METRIC] Input Maliciousness'] > (2/3):
-            st.markdown("🚨 **Malicious input from the user detected.** The user may be trying to trick the assistant. You can modify the assisant's goal or address this issue in your class.")
+            st.markdown("🚨 **Malicious input from the user detected.** The users may be trying to trick the assistant. You can modify the assisant's goal or discuss with your students in class the best uses for this technology.")
         
 
         records['ts'] = records['ts'].apply(lambda x: x[:16])
