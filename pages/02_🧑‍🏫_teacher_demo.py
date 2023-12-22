@@ -8,7 +8,7 @@ from trulens_eval import Tru
 
 st.title("Teacher Demo")
 
-DEMO_ACTIVITY_GOAL = 'Students must reflect on their understanding on Linear Algebra before the next lecture so they are prepared to answer the problem set.'
+DEMO_ACTIVITY_GOAL = 'Reflect on your understanding on Linear Algebra before the next lecture.'
 
 st.header("Use demo activity")
 st.write(f"The goal for this demo activity is: '{DEMO_ACTIVITY_GOAL}'")
@@ -66,13 +66,56 @@ if len(uploaded_files):
 
         st.success("Documents uploaded and indexed.")
 
+st.divider()
+st.header("Monitor Assistant Performance")
 if "tru_student" in st.session_state:
     if st.button("Check Performance (TruLens)"):
         tru = Tru()
         records, _ = tru.get_records_and_feedback(app_ids=[])
-        metric_cols = records.columns[records.columns.str.startswith("[METRIC]")]
+        metric_cols_ix = records.columns.str.startswith("[METRIC]") & ~records.columns.str.endswith("_calls")
+        metric_cols = records.columns[metric_cols_ix]
+        mean_metrics = records[metric_cols].mean()
+
+        # Show alerts for metrics that are below 0.3
+        if mean_metrics['[METRIC] Answer Relevance'] < (1/3):
+            st.markdown("🚨 **Low relevance of the assistant's answers.** The assistant may not have all the information needed to answer the question. You can try added more files to the activity.")
+        
+        if mean_metrics['[METRIC] Groundedness'] < (1/3):
+            st.markdown("🚨 **Low groundedness of the assistant's answers.** The assistant may be hallucinating some facts. Try addressing them in class to avoid misconceptions.")
+        
+        if mean_metrics['[METRIC] Insensitivity'] > (2/3):
+            st.markdown("🚨 **Insensitive answers from the assistant.** The assistant may be giving insensitive answers. In the activity goal you can try adding your desired tone for the bot (friendly, format, etc).")
+        
+        if mean_metrics['[METRIC] Input Maliciousness'] > (2/3):
+            st.markdown("🚨 **Malicious input from the user detected.** The user may be trying to trick the assistant. You can modify the assisant's goal or address this issue in your class.")
+        
+
+        records['ts'] = records['ts'].apply(lambda x: x[:16])
+        records['input'] = records['input'].apply(lambda x: eval(x)[0])
+        records['output'] = records['output'].apply(lambda x: eval(x))
+        config = {
+            'input' : st.column_config.TextColumn('input', width="small"),
+            'output' : st.column_config.TextColumn('output', width="small"),
+        }
+        for col in metric_cols:
+            config[col] = st.column_config.TextColumn(col.replace('[METRIC] ', '').replace(' ', '\n'), width="small")
         records = records[["ts", "input", "output", *metric_cols]]
-        st.write(records)
+        records[metric_cols] = records[metric_cols].round(3)
+        def color_code(val):
+            if val < 0.3:
+                color = '#d7481d'
+            elif (0.3 <= val <= 0.6):
+                color = '#fff321'
+            else:
+                color = '#59f720'
+            return f'background-color: {color}'
+
+        # Apply color coding to the DataFrame
+        styled_records = records.style.map(color_code, subset=metric_cols)
+        styled_records = styled_records.map(lambda x: color_code(1 - x), subset=['[METRIC] Input Maliciousness', '[METRIC] Insensitivity'])
+
+        st.dataframe(styled_records, use_container_width=True, column_config=config)
+
 
     
 
