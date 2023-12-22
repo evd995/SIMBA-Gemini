@@ -36,6 +36,16 @@ if st.button("Set-up demo activity"):
 
 st.divider()
 st.header("Create custom activity")
+
+st.markdown("""You can create your own activity by uploading PDFs and setting an activity goal.
+Here are some examples of some activities that you could use:
+- **Before the class**:
+    - "Create a plan of what you want to learn before the next class."
+    - "Think if you have any gaps in your knowledge before the next class."
+- **After a class**:
+    - "Did you understand the main concepts of the class?"
+    - "Think on how you can expand the knowledge you learned in class."
+""")
 activity_goal = st.text_input('Create an activity goal', placeholder=f"Ex: {DEFAULT_ACTIVITY_GOAL}")
 
 # Add documents with streamlit

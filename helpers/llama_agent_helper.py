@@ -101,8 +101,7 @@ def create_default_educational_tools(activity_goal=None):
         name="greet_student",
         description=(
             "Create an appropiate message to introduce yourself to the student." +
-            "Always use this tool to answer to messages like: 'Hi!' or 'Hello!'" + 
-            "Follow the output of this tool exactly as it says."
+            "Always use this tool to answer to messages like: 'Hi!' or 'Hello!'" 
         )
     )
 

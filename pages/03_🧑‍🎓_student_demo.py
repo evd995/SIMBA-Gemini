@@ -13,6 +13,14 @@ GOOGLE_AI_STUDIO = st.secrets["GEMINI_API_KEY"]
 
 col1, col2 = st.columns([3, 1])
 
+if "messages" in st.session_state:
+    with col2:
+        if st.button("Reset chat"):
+            st.session_state.messages = []
+            st.session_state.agent.reset()
+            tru = Tru()
+            tru.reset_database()
+
 if "activity_goal" in st.session_state:
     with col1:
         st.markdown(f"**The goal for this activity is: {st.session_state.activity_goal}**")
