@@ -83,7 +83,29 @@ def create_default_query_engine_tool(query_engine, document_nodes, metadata):
     return query_engine_tool
 
 
-def create_default_educational_tools():
+def create_default_educational_tools(activity_goal=None):
+    activity_goal = activity_goal or DEFAULT_ACTIVITY_GOAL
+
+    GREETING_PROMPT = (
+        "You are an assistant for students called SIMBA (Student Interactive Mentoring Bot Assistant)." +
+        "You are here to help students with their study habits and provide advice on how to improve them." +
+        f"In particular, you must help them complete the following task: '{activity_goal}'" +
+        "\n"
+        "Create a very short message to greet the student and introduce yourself." +
+        "Start your message with 'Hi! 😸 I am SIMBA, your educational assistant.'" +
+        f"At the end, include a question to kickstart the conversation towards the completing the task: '{activity_goal}'" 
+    )
+
+    greeting_tool = FunctionTool.from_defaults(
+        fn=lambda input: f"Here is an appropiate message to greet the student: ''{llm.complete(GREETING_PROMPT)}''. Do not use any more tools, send the greeting to the student as is. Do NOT call this tool again",
+        name="greet_student",
+        description=(
+            "Create an appropiate message to introduce yourself to the student." +
+            "Always use this tool to answer to messages like: 'Hi!' or 'Hello!'"
+        )
+    )
+
+
     EXPERT_PROMPT = (
         "You are an expert in providing educational advice. Use your knowledge in self-regulated learning to provide support." +
         "You only know about this topic (you DO NOT know about other topis like math, history, science, etc), so ask for context if you need to answer about this." +
@@ -103,7 +125,7 @@ def create_default_educational_tools():
             "Ask for advice from an expert educational assistant. They can help with student planning, goal setting, and reflection." + 
             "They do not have access to the conversation or course context, so be as detailed as possible in your question.")
     )
-    return [expert_tool]
+    return [expert_tool, greeting_tool]
 
 
 def create_agent_from_tools(tools, activity_goal=None):
@@ -124,7 +146,7 @@ def create_agent_from_documents(documents, metadata, activity_goal=None):
     for i, document in enumerate(documents):
         query_engine, document_nodes = create_query_engine(document)
         query_engine_tools += create_default_query_engine_tool(query_engine, document_nodes, metadata[i])
-    educational_tools = create_default_educational_tools()    
+    educational_tools = create_default_educational_tools(activity_goal=activity_goal)    
     agent = create_agent_from_tools(educational_tools + query_engine_tools, activity_goal=activity_goal)
 
     return agent
