@@ -16,17 +16,21 @@ st.write("The demo will use some pre-loaded PDFs.")
 
 if st.button("Set-up demo activity"):
     full_documents = []
+    full_metadata = []
     for filename in ['lecture-2.pdf', 'syllabus.pdf']:
         documents = SimpleDirectoryReader(
             input_files=[f"PDFs/{filename}"],
             # required_exts=[".pdf"],
             # recursive=True,
         ).load_data()
+        pdf_reader = PyPDF2.PdfReader(f"PDFs/{filename}")
+        metadata = pdf_reader.metadata
         document = Document(text="\n\n".join([doc.text for doc in documents]))
         full_documents.append(document)
+        full_metadata.append(metadata)
     with st.spinner('Indexing documents...'):
         st.session_state.activity_goal = DEMO_ACTIVITY_GOAL
-        st.session_state.agent = create_agent_from_documents(full_documents, activity_goal=st.session_state.activity_goal)
+        st.session_state.agent = create_agent_from_documents(full_documents, full_metadata, activity_goal=st.session_state.activity_goal)
         st.session_state.tru_student = build_tru_recorder(st.session_state.agent)
     st.success("Documents uploaded and indexed.")
 

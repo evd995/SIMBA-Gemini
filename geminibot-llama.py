@@ -92,7 +92,7 @@ if "query_engine" not in st.session_state:
     # ).load_data()
 
     full_documents = []
-    for filename in ['lecture-1.pdf', 'lecture-2.pdf', 'syllabus.pdf']:
+    for filename in ['lecture-2.pdf', 'syllabus.pdf']:
         documents = SimpleDirectoryReader(
             input_files=[f"PDFs/{filename}"],
             # required_exts=[".pdf"],

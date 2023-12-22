@@ -18,7 +18,8 @@ from gemini_config import SAFETY_SETTINGS, DEFAULT_TEMPERATURE
 
 
 DEFAULT_ACTIVITY_GOAL = "Help the student reflect on their study habits and plan for future study session."
-
+from llama_index.query_engine import SubQuestionQueryEngine
+from llama_index.question_gen.llm_generators import LLMQuestionGenerator
 
 GOOGLE_AI_STUDIO = st.secrets["GEMINI_API_KEY"]
 llm = Gemini(api_key=GOOGLE_AI_STUDIO, temperature=DEFAULT_TEMPERATURE, safety_settings=SAFETY_SETTINGS)
@@ -27,21 +28,21 @@ llm = Gemini(api_key=GOOGLE_AI_STUDIO, temperature=DEFAULT_TEMPERATURE, safety_s
 def create_query_engine(documents):
     # Create pipeline
     text_splitter = SentenceSplitter(
-        chunk_size=512, chunk_overlap=128
+        chunk_size=256, chunk_overlap=64
     )
 
     extractors = [
         #TitleExtractor(nodes=5, llm=llm),
-        QuestionsAnsweredExtractor(questions=3, llm=llm),
-        #SummaryExtractor(summaries=["prev", "self"], llm=llm),
-        KeywordExtractor(keywords=3, llm=llm),
+        #QuestionsAnsweredExtractor(questions=3, llm=llm),
+        SummaryExtractor(summaries=["prev", "self"], llm=llm),
+        #KeywordExtractor(keywords=3, llm=llm),
     ]
 
     transformations = [text_splitter] + extractors
     pipeline = IngestionPipeline(transformations=transformations)
 
     # Pass documents through pipeline
-    document_nodes = pipeline.run(documents=documents)
+    document_nodes = pipeline.run(documents=[documents])
 
     # Create vector store with Gemini embeddings
     embed_model = GeminiEmbedding(
@@ -60,26 +61,26 @@ def create_query_engine(documents):
     query_engine = index.as_query_engine(
         service_context=service_context,
         verbose=True,
-        similarity_top_k=4
+        similarity_top_k=5
     )
-    return query_engine
+    return query_engine, document_nodes
 
 
-def create_default_query_engine_tool(query_engine):
-    query_engine_tools = [
+def create_default_query_engine_tool(query_engine, document_nodes, metadata):
+    query_engine_tool = [
         QueryEngineTool(
             query_engine=query_engine,
             metadata=ToolMetadata(
-                name="course_info",
+                name="_".join(metadata.title.split(" ")),
                 description=(
-                    "Access relevant documents from the course, such as the syllabus, " +  
-                    "bibliography, and lecture notes." + 
+                    f"Access relevant documents from the course, this one is summarized as: {document_node.metadata['section_summary']}." + 
+                    "Use information from this document if the summary has topics of the question." + 
                     "Requires the input parameter be a phrase summarizing the information to be retreived."
                 ),
             ),
-        )
+        ) for document_node in document_nodes
     ]
-    return query_engine_tools
+    return query_engine_tool
 
 
 def create_default_educational_tools():
@@ -118,9 +119,12 @@ def create_agent_from_tools(tools, activity_goal=None):
     return agent
 
 
-def create_agent_from_documents(documents, activity_goal=None):
-    query_engine = create_query_engine(documents)
-    educational_tools = create_default_educational_tools()
-    query_engine_tools = create_default_query_engine_tool(query_engine)
+def create_agent_from_documents(documents, metadata, activity_goal=None):
+    query_engine_tools = []
+    for i, document in enumerate(documents):
+        query_engine, document_nodes = create_query_engine(document)
+        query_engine_tools += create_default_query_engine_tool(query_engine, document_nodes, metadata[i])
+    educational_tools = create_default_educational_tools()    
     agent = create_agent_from_tools(educational_tools + query_engine_tools, activity_goal=activity_goal)
+
     return agent
